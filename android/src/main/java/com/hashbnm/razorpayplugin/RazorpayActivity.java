@@ -7,15 +7,17 @@ import android.widget.Toast;
 
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
+import com.razorpay.*;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RazorpayActivity extends Activity implements PaymentResultListener {
+public class RazorpayActivity extends Activity implements PaymentResultListener, ExternalWalletListener {
     private static final String TAG = RazorpayActivity.class.getSimpleName();
     public static String EXTRA_PRODUCT_NAME = "name";
     public static String EXTRA_PRODUCT_IMAGE = "image";
@@ -36,6 +38,23 @@ public class RazorpayActivity extends Activity implements PaymentResultListener 
         Intent intent = getIntent();
         Checkout.preload(getApplicationContext());
         startPayment(intent);
+    }
+
+    @Override
+    public void onExternalWalletSelected(String walletName, PaymentData paymentData){
+        // add your logic here to handle external wallet payments like
+        if(walletName.equals("paytm")){
+            try {
+                Intent data = new Intent();
+                data.putExtra("wallet", "paytm");
+                data.putExtra(PAYMENT_ID, "paytm");
+                setResult(Activity.RESULT_OK, data);
+                finish();
+            } catch (Exception e) {
+                Log.e(TAG, "Exception in onPaymentSuccess", e);
+            }
+        }
+
     }
 
     public void startPayment(Intent intent) {
@@ -62,6 +81,12 @@ public class RazorpayActivity extends Activity implements PaymentResultListener 
             preFill.put(EXTRA_PREFILL_EMAIL, intent.getStringExtra(EXTRA_PREFILL_EMAIL));
             preFill.put(EXTRA_PREFILL_CONTACT, intent.getStringExtra(EXTRA_PREFILL_CONTACT));
             options.put("prefill", preFill);
+            JSONArray wallets = new JSONArray();
+            wallets.put("paytm");
+            JSONObject externals = new JSONObject();
+            externals.put("wallets", wallets);
+            options.put("external", externals);
+
 
             if (intent.getSerializableExtra(EXTRA_NOTES) != null) {
                 JSONObject notes = new JSONObject();
