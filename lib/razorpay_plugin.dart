@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-
 class Razorpay {
   static const MethodChannel _channel =
       const MethodChannel('razorpay_plugin');
